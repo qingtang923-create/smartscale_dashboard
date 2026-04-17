@@ -3,7 +3,7 @@ import plotly.express as px
 from data_utils import load_project_data
 
 st.set_page_config(
-    page_title="SMART SCALE Dashboard",
+    page_title="OMF Dashboard",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -47,10 +47,14 @@ def add_count_labels(df, group_col):
 df = get_data().copy()
 
 # Keep valid rows
-df = df[(df["AvgDelayBefore"] > 0) & (df["AvgSpeedBefore"] > 0) & (df["AvgSpeedAfter"] > 0)].copy()
+df = df[
+    (df["AvgDelayBefore"] > 0) &
+    (df["AvgSpeedBefore"] > 0) &
+    (df["AvgSpeedAfter"] > 0)
+].copy()
 
 # Compute OMFs
-# Delay OMF: After / Before  -> <1 means improvement
+# Delay OMF: After / Before -> <1 means improvement
 df["OMF_delay"] = df["AvgDelayAfter"] / df["AvgDelayBefore"]
 
 # Speed OMF: Before / After -> <1 means improvement
@@ -74,29 +78,69 @@ st.caption(
     "For both measures, values below 1 indicate improvement."
 )
 
-# Overall distributions
+# --------------------------------
+# 2. Overall OMF distributions
+# --------------------------------
 st.subheader("Overall OMF Distributions")
 
-fig_overall_delay = px.histogram(
-    df,
-    x="OMF_delay",
-    nbins=25,
-    title="Distribution of Delay OMF Across All Projects"
-)
-fig_overall_delay.update_layout(xaxis_title="Delay OMF", yaxis_title="Count")
-st.plotly_chart(fig_overall_delay, use_container_width=True)
+delay_col, delay_box_col = st.columns(2)
 
-fig_overall_speed = px.histogram(
-    df,
-    x="OMF_speed",
-    nbins=25,
-    title="Distribution of Speed OMF Across All Projects"
-)
-fig_overall_speed.update_layout(xaxis_title="Speed OMF", yaxis_title="Count")
-st.plotly_chart(fig_overall_speed, use_container_width=True)
+with delay_col:
+    fig_overall_delay = px.histogram(
+        df,
+        x="OMF_delay",
+        nbins=25,
+        title="Distribution of Delay OMF Across All Projects"
+    )
+    fig_overall_delay.update_layout(
+        xaxis_title="Delay OMF",
+        yaxis_title="Count"
+    )
+    st.plotly_chart(fig_overall_delay, use_container_width=True)
+
+with delay_box_col:
+    fig_overall_delay_box = px.box(
+        df,
+        y="OMF_delay",
+        points="all",
+        title="Boxplot of Delay OMF Across All Projects"
+    )
+    fig_overall_delay_box.update_layout(
+        xaxis_title="All Projects",
+        yaxis_title="Delay OMF"
+    )
+    st.plotly_chart(fig_overall_delay_box, use_container_width=True)
+
+speed_col, speed_box_col = st.columns(2)
+
+with speed_col:
+    fig_overall_speed = px.histogram(
+        df,
+        x="OMF_speed",
+        nbins=25,
+        title="Distribution of Speed OMF Across All Projects"
+    )
+    fig_overall_speed.update_layout(
+        xaxis_title="Speed OMF",
+        yaxis_title="Count"
+    )
+    st.plotly_chart(fig_overall_speed, use_container_width=True)
+
+with speed_box_col:
+    fig_overall_speed_box = px.box(
+        df,
+        y="OMF_speed",
+        points="all",
+        title="Boxplot of Speed OMF Across All Projects"
+    )
+    fig_overall_speed_box.update_layout(
+        xaxis_title="All Projects",
+        yaxis_title="Speed OMF"
+    )
+    st.plotly_chart(fig_overall_speed_box, use_container_width=True)
 
 # ---------------------------------------------------
-# 2. Delay / Speed OMF by Dominant Improvement Type
+# 3. Delay / Speed OMF by Dominant Improvement Type
 # ---------------------------------------------------
 st.subheader("Delay OMF by Dominant Improvement Type")
 
@@ -148,7 +192,7 @@ else:
     st.warning("DominantImprovementType data not available.")
 
 # ----------------------------------------
-# 3. Delay / Speed OMF by Facility Type
+# 4. Delay / Speed OMF by Facility Type
 # ----------------------------------------
 st.subheader("Delay OMF by Facility Type")
 
@@ -200,7 +244,7 @@ else:
     st.warning("FacilityType data not available.")
 
 # ----------------------------------------
-# 4. Baseline Delay vs Delay OMF
+# 5. Baseline Delay vs Delay OMF
 # ----------------------------------------
 st.subheader("Baseline Delay vs Delay OMF")
 
@@ -219,7 +263,7 @@ fig5.update_layout(
 st.plotly_chart(fig5, use_container_width=True)
 
 # ----------------------------------------
-# 5. Single-Treatment Projects Only
+# 6. Single-Treatment Projects Only
 # ----------------------------------------
 st.subheader("Single-Treatment Projects Only")
 
